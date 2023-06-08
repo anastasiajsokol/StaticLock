@@ -1,8 +1,17 @@
+/**
+ *  Create service workers only on specific scope!
+ *      This way every worker can have a different hash ability
+ * 
+ *  Switch to using AES-GCM
+**/
+
+/*
 async function install_service_worker(){
     if("serviceWorker" in navigator){
         try {
             const registration = await navigator.serviceWorker.register("/lockworker.js", {
-                scope: "/"
+                scope: "/",
+                type: "module"
             });
 
             if (registration.installing) {
@@ -21,3 +30,6 @@ async function install_service_worker(){
 }
 
 install_service_worker();
+*/
+
+console.log("heya, have a nice flight :)");
