@@ -31,5 +31,3 @@ async function install_service_worker(){
 
 install_service_worker();
 */
-
-console.log("heya, have a nice flight :)");

@@ -1,16 +1,37 @@
 <!DOCTYPE html>
-
 <html>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Lock Test</title>
+        <title>Static Lock</title>
         <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <script src="keyring.js"></script>
 
-        <script src="lib/fernet.js"></script>
-        <script type="module" src="lock.js"></script>
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+            }
+
+            body {
+                width: 100vw;
+                height: 100vh;
+                background: linear-gradient(45deg, rgb(255, 166, 0), rgb(255, 17, 235));
+            }
+        </style>
     </head>
     <body>
-        
+        <script>
+            window.keyring.register("password", "locked").then(ok => {
+                if(ok){
+                    console.log("'fetching'");
+                    window.keyring.fetch("/locked", "/lock.html").then(res => {
+                        console.log(res);
+                    });
+                } else {
+                    console.log("incorrect password");
+                }
+            });
+        </script>
     </body>
 </html>

@@ -1,10 +1,16 @@
 {
-	"password": "password",
-	"salts": {
-		"password": "l3_TE8LcxJfeEWR_cDQvFQ==",
-		"files": "DjbexUmTRnmjvHLw1YM96w=="
-	},
-	"input": "./locked",
-    "output": "./src/locked",
-    "saltfile": "./src/salt.json"
+	"version": "0.2",
+	"root": "src",
+	"paths": [
+		{
+			"input": "lock/locked",
+			"scope": "locked",
+			"password": "password"
+		},
+		{
+			"input": "lock/other",
+			"scope": "other",
+			"password": "abc123"
+		}
+	]
 }

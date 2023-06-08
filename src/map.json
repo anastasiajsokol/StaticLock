@@ -1,0 +1,34 @@
+{
+    "valid": true,
+    "version": "0.2",
+    "paths": {
+        "locked": {
+            "passwordhash": "zuI5KRxzWZZQ7i4UTPaktvtTkT1+bEGcXIIqKpOMsJk=",
+            "salts": {
+                "password": "ka46+gXX+zNI1WIro6k3keoC",
+                "data": "eg3Gr3XZaY7PlQLku1PSXs/o"
+            },
+            "files": [
+                {
+                    "path": "lock.html",
+                    "tag": "sK1/nZzg29WBdiBsiFZvjQ==",
+                    "iv": "cmSbPIQdrWF9HFolhfUfwCsZYbGHjSNjWEwBlJqSXYVGVu04qkcHxrPwE/QJwAyeHKnWZQJm7c/Xb+M8lEY+iyxpSZWO+NOOWjNlrMLJoYBiefrOFSYWCGujOFIFwSp4"
+                }
+            ]
+        },
+        "other": {
+            "passwordhash": "D1kC3HmgQcirS8m9cf9MQuWYVqW/9eAJM9u4tnZBw/k=",
+            "salts": {
+                "password": "KPZjfxE7JGAFxSD117FbjkSQ",
+                "data": "jnRns+M0zyj40mVmVkLIbcZW"
+            },
+            "files": [
+                {
+                    "path": "other.html",
+                    "tag": "Vcm5ELJ8rL5BnLxgu6rqhw==",
+                    "iv": "BwMM0RLEHLnKzQ1g0sxXrkEnHUp2FMjF6OUBGvNA2i7AQx8+kmgi6VruieZdGQYvGnQTD4OhE0lRsoeKl8+nIzEIGBfEP2kfD0WE4zFA5u1yAPL8961CDC4XCEIeQJFN"
+                }
+            ]
+        }
+    }
+}
