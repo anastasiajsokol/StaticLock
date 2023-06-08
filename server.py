@@ -23,13 +23,15 @@ certificate_directory = os.path.join(os.path.dirname(__file__), "cert")
 keyfile = os.path.join(certificate_directory, "key.pem")
 certfile = os.path.join(certificate_directory, "cert.pem")
 
+"""
 httpd.socket = ssl.wrap_socket (
             httpd.socket, 
             keyfile = keyfile, 
             certfile = certfile,
             server_side = True
         )
+"""
 
-print("Serving at https://0.0.0.0:8000")
+print("Serving at http://localhost:8000")
 
 httpd.serve_forever()
