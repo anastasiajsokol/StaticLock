@@ -1,3 +1,10 @@
+/**
+ *  Static Lock Keyring
+ *      updated: June 9th, 2023
+ *      author: Anastasia Sokol
+ *      version: 0.2
+**/
+
 class Keyring {
     constructor(){
         if(!("serviceWorker" in navigator)){
@@ -80,7 +87,7 @@ class Keyring {
                 }
 
                 // register service worker to scope
-                console.warn("No service worker registered! Use keyring.fetch(scope, path)");
+                console.warn("No service worker registered! Not implimented");
 
                 let scopekey = await window.crypto.subtle.deriveBits(
                     {
@@ -95,20 +102,6 @@ class Keyring {
                 map.paths[scope].key = scopekey;
                 
                 return true;
-            });
-        });
-    }
-
-    fetch(scope, path, init = undefined){
-        return this.map.then(async map => {
-            if(!map.valid){ throw new Error("invalid page map - see keyring.loadmap"); }
-            else if(map.paths[scope] === undefined){ throw new Error(`No scope ${scope} in page map`); }
-            else if(map.paths[scope].key === undefined){ throw new Error(`No key associated with scope ${scope} - see keyring.register`); }
-
-            return fetch(scope + "/" + path, init).then(response => { 
-                // TODO figure out how to decrypt the body while (symbolically) preserving the request object
-                console.warn("Decryption not implimented!");
-                return response;
             });
         });
     }
