@@ -10,6 +10,8 @@ class Keyring {
         if(!("serviceWorker" in navigator)){
             throw Error("Static Lock: unable to create keyring without service worker support!");
         }
+
+        console.warn("Keyring is not yet properly implimented");
         
         // load map.json from root
         this.loadmap();
