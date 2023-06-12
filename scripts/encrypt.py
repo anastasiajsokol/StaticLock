@@ -16,9 +16,10 @@ import os
 
 VERSION = "0.2"
 
-def hash(password: str) -> Tuple[bytes, bytes]:
+def hash(password: str, salt: bytes = None) -> Tuple[bytes, bytes]:
     """Generate hash with random salt from password, returns (hash, hashsalt)"""
-    salt = os.urandom(18) # note that this does not need to be cryptographic randomness
+    if salt == None:
+        salt = os.urandom(18) # note that this does not need to be cryptographic randomness
     hash = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -76,7 +77,7 @@ def create_encrypted_directory(search: str, root: str, scope: str, password: str
     passwordhashsalt = base64.b64encode(passwordhashsalt).decode("utf-8")
     passwordhash = base64.b64encode(passwordhash).decode("utf-8")
     keysalt = base64.b64encode(keysalt).decode("utf-8")
-
+    
     # create path map (eventually returned)
     map = {
         "passwordhash": passwordhash,

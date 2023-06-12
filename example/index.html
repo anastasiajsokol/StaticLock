@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Static Lock</title>
         <link rel="icon" type="image/x-icon" href="favicon.ico">
-        <script src="keyring.js"></script>
 
         <style>
             * {
@@ -19,19 +18,12 @@
                 background: linear-gradient(45deg, rgb(255, 166, 0), rgb(255, 17, 235));
             }
         </style>
+
+        <script src="keyring.js"></script>
     </head>
     <body>
         <script>
-            window.keyring.register("password", "locked").then(ok => {
-                if(ok){
-                    console.log("'fetching'");
-                    window.keyring.fetch("/locked", "/lock.html").then(res => {
-                        console.log(res);
-                    });
-                } else {
-                    console.log("incorrect password");
-                }
-            });
+            window.keyring.register("password", "locked");
         </script>
     </body>
 </html>

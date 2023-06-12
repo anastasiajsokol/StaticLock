@@ -5,6 +5,7 @@
  *      version: 0.2
 **/
 
+// PBKDF2 hash as Uint8Array
 async function hash(password, salt){
     const enc = new TextEncoder();
     
@@ -86,20 +87,44 @@ class Keyring {
     }
 
     async register(password, path){
-        console.warn("registering service workers is not yet implimented");
-
         // verify password is correct before registering service worker
         if(!(await this.verify(password, path))){
             throw new Error(`cannot register service worker on path ${path} with incorrect password`);
         }
 
+        // calculate key
+        const salt = await this.map.then(map => {
+            if(!map.valid){
+                throw new Error("cannot acquire password salt - invalid map object");
+            }
+            const raw = map.paths[path]?.salts?.password;
+            if(!raw){
+                throw new Error("cannot acquire password salt - invalid map structure");
+            }
+            const buffer = atob(raw);
+            return new Uint8Array(buffer.length).map((_, i, __) => buffer.charCodeAt(i));
+        });
+
+        const key = await hash(password, salt);
+
+        // unregister old version
+        await navigator.serviceWorker.getRegistrations(path).then(workers => {
+            console.log(`removing ${workers.length} workers on scope`);
+            for(const worker of workers){
+                worker.unregister();
+            }
+        });
+
         // register service worker
-        navigator.serviceWorker.register("key.js", {
-            scope: path
-        }).then(worker => {
-            console.log("registered worker", worker);
+        await navigator.serviceWorker.register("key.js", {
+            scope: path,
+            updateViaCache: 'none'
+        }).then(reg => {
+            const worker = reg.installing ?? reg.waiting ?? reg.active;
+            worker.postMessage({key: key}, [key.buffer]);
+            console.log("worker registered with key");
         }).catch(error => {
-            console.error(`failed to register worker: ${error}`);
+            console.error(`error registering worker: ${error} (note invalid worker may still be installed)`);
         });
     }
 };

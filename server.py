@@ -15,7 +15,7 @@ import os
 
 HTTPS = False
 
-web_directory = os.path.join(os.path.dirname(__file__), "src")
+web_directory = os.path.join(os.path.dirname(__file__), "example")
 
 os.chdir(web_directory)
 
