@@ -1,6 +1,6 @@
 /**
  *  Static Lock Service Worker Key
- *      updated: June 11th, 2023
+ *      updated: June 21st, 2023
  *      author: Anastasia Sokol
  *      version: 0.2
 **/
@@ -34,18 +34,25 @@ const indexdb = new Promise(resolve => {
 
 /**
  *  Create simple object to store and retrieve the decryption key between sessions
- *      Note that a key must be set before retrieved
- *      By design only the 'install' event handler should set the key (paired with initial 'message' event)
+ *      Note that if a key is not set, undefined is returned
+ *      By design only 'message' events should register keys (this is not enforced)
 **/
 const db = {
-    async getkey(){
+    _keys: {},
+    
+    map: fetch('map.json').then(map => map.json()).catch(error => {
+        console.error(`lock service worker failed to load map ${error}`);
+        return {valid: false};
+    }),
+
+    async getkey(scope){
         // fetch and cache from indexed database if not already cached
-        if(!this._key){
-            this._key = await new Promise(resolve => {
+        if(!(scope in this._keys)){
+            this._keys[scope] = await new Promise(resolve => {
                 indexdb.then(db => {
                     const transaction = db.transaction("keys", "readonly");
                     const store = transaction.objectStore("keys");
-                    const request = store.get(self.registration.scope);
+                    const request = store.get(scope);
                     request.onsuccess = event => {
                         resolve(event.target.result.key);
                     };
@@ -58,12 +65,12 @@ const db = {
         }
 
         // return cache
-        return this._key;
+        return this._keys[scope];
     },
 
-    async setkey(key){
+    async setkey(scope, key){
         // set local cache
-        this._key = key;
+        this._keys[scope] = key;
 
         // save to indexed database
         await new Promise(resolve => {
@@ -78,22 +85,20 @@ const db = {
                 resolve(data);
             });
         });
-    },
-    map: fetch('map.json').then(map => map.json()).catch(error => {
-        console.error(`lock service worker failed to load map ${error}`);
-        return {valid: false};
-    })
+    }
 };
 
 /**
  *  Accept decryption keys from keyring
 **/
 self.addEventListener("message", event => {
-    if(event.data.key){
+    if(event.data.key && event.data.scope && event.data.version == "0.2"){
         console.log(`setting key ${event.data.key}`);
-        db.setkey(event.data.key);
+        db.setkey(event.data.scope, event.data.key);
+    } else if(event.data.version != undefined && event.data.version != "0.2"){
+        console.error(`message to key service worker version "0.2" had version meta data ${event.data.version}`);
     } else {
-        console.warn("static lock key service worker received message without key data");
+        console.warn("static lock key service worker received message without valid key data");
     }
 }, {
     passive: true
@@ -103,7 +108,7 @@ self.addEventListener("message", event => {
  *  Install service worker by storing key from message event
 **/
 self.addEventListener("install", event => {
-    console.log(`installing static lock key worker for scope ${self.registration.scope}`);
+    console.log(`installing static lock key worker on ${self.registration.scope == '/' ? "global scope" : self.registration.scope}`);
     self.skipWaiting();
 });
 
@@ -111,7 +116,7 @@ self.addEventListener("install", event => {
  *  Claim all clients (in scope) when activated
 **/
 self.addEventListener("activate", event => {
-    console.log(`activating static lock key worker for scope ${self.registration.scope}`);
+    console.log(`activating static lock key worker on ${self.registration.scope == '/' ? "global scope" : self.registration.scope}`);
     clients.claim();
 });
 
@@ -119,20 +124,6 @@ self.addEventListener("activate", event => {
  *  Decrypt response body before returning
 **/
 self.addEventListener("fetch", (event) => {
-    return db.map.then(async map => {
-        // load and get required information from map
-        if(!map.valid){
-            console.log("invalid map");
-            return new Response("Unable to load valid map", {
-                status: 503
-            });
-        }
-
-        console.log(event.request.url);
-
-        // load key from database
-        const key = await db.getkey();
-
-        return fetch(event.request);
-    });
+    console.warn("currently just a raw fetch");
+    return fetch(event.request);
 });

@@ -116,7 +116,7 @@ def dispatch(configuration: dict, verbose: bool = True, jsonindent: int = 4) -> 
     map = {
         "valid": True,
         "version": VERSION,
-        "paths": {}
+        "scopes": {}
     }
     
     # encrypt requested directories
@@ -124,7 +124,7 @@ def dispatch(configuration: dict, verbose: bool = True, jsonindent: int = 4) -> 
     for path in configuration["paths"]:
         if verbose:
             print(f"Encrypting {path['input']} to {os.path.join(root, path['scope'])}")
-        map["paths"][path['scope']] = create_encrypted_directory(path["input"], root, path["scope"], path["password"])
+        map["scopes"][path['scope']] = create_encrypted_directory(path["input"], root, path["scope"], path["password"])
     
     # save map to map.json in web root
     maplocation = os.path.join(root, "map.json")

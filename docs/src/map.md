@@ -12,10 +12,10 @@
     version: string
         must match version of both encryption and decryption tools, currently '0.2'
     
-    paths: object
-        indexed by scopes, contains path objects as described below
+    scopes: object
+        indexed by scopes, contains scope objects as described below
 
-## Path Objects
+## Scope Objects
 
     passwordhash: string (base64)
         base64 encoded salted hash of the scope password, must not be the same as the key (aka the password salt and data salt must be different); should be used for UI password verification

@@ -1,16 +1,11 @@
 {
-	"version": "0.2",
-	"root": "src",
-	"paths": [
-		{
-			"input": "lock/locked",
-			"scope": "locked",
-			"password": "password"
-		},
-		{
-			"input": "lock/other",
-			"scope": "other",
-			"password": "abc123"
-		}
-	]
+    "version": "0.2",
+    "root": "example",
+    "paths": [
+        {
+            "input": "lock/locked",
+            "scope": "locked",
+            "password": "password"
+        }
+    ]
 }

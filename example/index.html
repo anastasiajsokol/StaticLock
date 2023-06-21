@@ -23,7 +23,9 @@
     </head>
     <body>
         <script>
-            window.keyring.register("password", "locked");
+            window.keyring.verify("locked", "password").then(res => {
+                console.log(res);
+            });
         </script>
     </body>
 </html>
