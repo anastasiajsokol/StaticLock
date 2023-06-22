@@ -85,7 +85,7 @@ def create_encrypted_directory(search: str, root: str, scope: str, password: str
             "password": passwordhashsalt,
             "data": keysalt
         },
-        "files": []
+        "files": {}
     }
 
     for base, _, files in os.walk(search):
@@ -99,11 +99,10 @@ def create_encrypted_directory(search: str, root: str, scope: str, password: str
         for file in files:
             iv, tag = create_encrypted_file(os.path.join(base, file), os.path.join(location, file), key)
 
-            map["files"].append({
-                "path": os.path.join(offset, file),
+            map["files"]['/' + os.path.join(offset, file)] = {
                 "tag": base64.b64encode(tag).decode('utf-8'),
                 "iv": base64.b64encode(iv).decode('utf-8')
-            })
+            }
     
     return map
 
@@ -124,7 +123,7 @@ def dispatch(configuration: dict, verbose: bool = True, jsonindent: int = 4) -> 
     for path in configuration["paths"]:
         if verbose:
             print(f"Encrypting {path['input']} to {os.path.join(root, path['scope'])}")
-        map["scopes"][path['scope']] = create_encrypted_directory(path["input"], root, path["scope"], path["password"])
+        map["scopes"]['/' + path['scope']] = create_encrypted_directory(path["input"], root, path["scope"], path["password"])
     
     # save map to map.json in web root
     maplocation = os.path.join(root, "map.json")

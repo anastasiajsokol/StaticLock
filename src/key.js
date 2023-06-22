@@ -6,13 +6,21 @@
 **/
 
 /**
+ *  check access to the SubtleCrypto API - without access the service worker should fail to install
+**/
+if(!self.crypto.subtle){
+    console.error("static lock key installation failed - requires access to SubtleCrypto API");
+    throw new Error("the static lock service worker key can not be registered without the SubtleCrypto API");
+}
+
+/**
  *  setup and load index database
  *      note that this is required for worker functionality and should fail to register if it fails
 **/
 
 if(!self.indexedDB){
     console.error("static lock key installation failed - requires access to indexedDB api");
-    throw new Error("the static lock service worker key can not be registered without the indexedDB api");
+    throw new Error("the static lock service worker key can not be registered without the indexedDB API");
 }
 
 const indexdb = new Promise(resolve => {
@@ -54,7 +62,7 @@ const db = {
                     const store = transaction.objectStore("keys");
                     const request = store.get(scope);
                     request.onsuccess = event => {
-                        resolve(event.target.result.key);
+                        resolve(event.target.result?.key);
                     };
                     request.onabort = _ => {
                         console.warn(`unable get key from database`);
@@ -88,17 +96,68 @@ const db = {
     }
 };
 
+async function getDecryptionInformation(url){
+    const map = await db.map;
+
+    if(!map.valid){
+        throw new Error("Unable to glean decryption information from an invalid map");
+    }
+    
+    url = new URL(url);
+
+    let scope = url.pathname.split("/");
+    let file = '/' + scope.pop();
+
+    while(scope.length){
+        const joined_scope = scope.join("/");
+        if(joined_scope in (map.scopes ?? {})){
+            if(file in (map.scopes[joined_scope].files ?? {})){
+                let key = await db.getkey(joined_scope);
+                
+                if(key === undefined){
+                    console.warn("attempt to access encrypted scope which has not yet been unlocked, defaulting to raw");
+                    return {type: "raw"};
+                }
+
+                const decode = (value) => { value = atob(value); return new Uint8Array(value.length).map((_, i, __) => value.charCodeAt(i)); }
+
+                return {
+                    type: "AESGCM",
+                    key: key,
+                    iv: decode(map.scopes[joined_scope].files[file].iv),
+                    tag: decode(map.scopes[joined_scope].files[file].tag),
+                };
+            }
+
+            console.warn("unregistered file in encrypted scope, defaulting to raw - map.json may be outdated or invalid");
+            return { type: "raw" };
+        }
+
+        file = '/' + scope.pop() + file;
+    }
+
+    return {type: "raw"};
+}
+
 /**
  *  Accept decryption keys from keyring
 **/
 self.addEventListener("message", event => {
-    if(event.data.key && event.data.scope && event.data.version == "0.2"){
-        console.log(`setting key ${event.data.key}`);
-        db.setkey(event.data.scope, event.data.key);
-    } else if(event.data.version != undefined && event.data.version != "0.2"){
-        console.error(`message to key service worker version "0.2" had version meta data ${event.data.version}`);
+    const data = event.data;
+    
+    if(data.version !== "0.2"){
+        console.error(`static lock service worker recieved a message with invalid version metadata (expects version "0.2", got ${data.version})`);
+        return;
+    }
+
+    if(data.action === "store"){
+        if(!data.key || !data.scope){
+            throw new Error("the store action requires both a key and a scope");
+        }
+
+        db.setkey(data.scope, data.key);
     } else {
-        console.warn("static lock key service worker received message without valid key data");
+        console.warn("static lock service worker - unsure what to do with message", data);
     }
 }, {
     passive: true
@@ -108,7 +167,7 @@ self.addEventListener("message", event => {
  *  Install service worker by storing key from message event
 **/
 self.addEventListener("install", event => {
-    console.log(`installing static lock key worker on ${self.registration.scope == '/' ? "global scope" : self.registration.scope}`);
+    console.log(`installing static lock key worker on ${self.registration.scope}`);
     self.skipWaiting();
 });
 
@@ -116,7 +175,7 @@ self.addEventListener("install", event => {
  *  Claim all clients (in scope) when activated
 **/
 self.addEventListener("activate", event => {
-    console.log(`activating static lock key worker on ${self.registration.scope == '/' ? "global scope" : self.registration.scope}`);
+    console.log(`activating static lock key worker on ${self.registration.scope}`);
     clients.claim();
 });
 
@@ -124,6 +183,27 @@ self.addEventListener("activate", event => {
  *  Decrypt response body before returning
 **/
 self.addEventListener("fetch", (event) => {
-    console.warn("currently just a raw fetch");
-    return fetch(event.request);
+    event.respondWith((async _ => {
+        const info = await getDecryptionInformation(event.request.url);
+        return fetch(event.request).then(async response => {
+            if(info.type === 'AESGCM'){
+                const body = new Uint8Array(await response.arrayBuffer());
+
+                const cyphertext = new Uint8Array(body.length + info.tag.length);
+                cyphertext.set(body);
+                cyphertext.set(info.tag, body.length);
+
+                return self.crypto.subtle.decrypt({
+                    name: "AES-GCM",
+                    iv: info.iv,
+                    tagLength: 128,
+                    data: body
+                }, info.key, cyphertext).then(decrypted_body => {
+                    return new Response(decrypted_body, response);
+                });
+            }
+
+            return response;
+        });
+    })());
 });

@@ -36,12 +36,19 @@ class Keyring {
             throw new Error("unable to create static lock keyring without service worker support!");
         }
 
+        // register a decryption worker on the global scope
+        // because static lock is designed for static sites, the worker will also cache responses by default
+        this.worker = navigator.serviceWorker.register("key.js", {
+            scope: "/",
+            updateViaCache: "none"
+        });
+
         // attempt to load map (made public in case supervisory code wishes to update or retry in case of error)
         // note that this.map is a Promise, not a 'real' value
-        this.reloadmap();
+        this.reloadMap();
     }
-
-    reloadmap(){
+    
+    reloadMap(){
         this.map = fetch("map.json").then(res => res.json()).then(map => {
             // ensure the versions match (also decreases the chances of an unintentional resource name overlap not being detected till later)
             if(map.version != "0.2"){
@@ -54,9 +61,9 @@ class Keyring {
         });
     }
 
-    verify(password, scope){
+    verifyPassword(scope, password){
         return this.map.then(async map => {
-            // ensure structure
+            // ensure structure is ok
             if(!map.valid){
                 throw new Error("currently keyring holds an invalid map (see keyring.reloadmap)");
             } else if(!map.scopes[scope]){
@@ -64,7 +71,7 @@ class Keyring {
             }
 
             // unpack salt and hash (decode and ensure they exist)
-            const exists = (value) => { if(!value){ throw new Error(`invalid path object at map path ${scope}`); } return value; }
+            const exists = (value) => { if(!value){ throw new Error(`invalid scope object at map path ${scope}`); } return value; }
             const decode = (value) => { value = atob(value); return new Uint8Array(value.length).map((_, i, __) => value.charCodeAt(i)); }
             let passwordsalt = decode(exists(map.scopes[scope].salts?.password));
             let passwordhash = decode(exists(map.scopes[scope].passwordhash));
@@ -79,11 +86,48 @@ class Keyring {
 
             for(let i = 0; i < hashbuffer.length; ++i){
                 if(hashbuffer[i] !== passwordhash[i]){
-                    return false; }
+                    return false;
+                }
             }
 
             return true;
         });
+    }
+
+    async registerScope(scope, password){
+        // get site map and ensure scope is registered
+        const map = await this.map;
+        
+        if(!map.valid){
+            throw new Error("invalid map - try Keyring.reloadMap before attempting again");
+        }
+
+        if(map.scopes[scope] === undefined){
+            throw new Error("cannot register password for scope that is not in map, try Keyring.reloadMap to refresh cache in case of outdated version");
+        }
+
+        // read salt from site map
+        const exists = (value) => { if(!value){ throw new Error(`invalid scope object at map path ${scope}`); } return value; }
+        const decode = (value) => { value = atob(value); return new Uint8Array(value.length).map((_, i, __) => value.charCodeAt(i)); }
+        const salt = decode(exists(map.scopes[scope].salts?.data));
+
+        // generate key from password hash
+        const key = await window.crypto.subtle.importKey("raw", await hash(password, salt), { name: "AES-GCM" }, false, ["decrypt"]);
+
+        // get current worker
+        const worker = await this.worker.then(res => { return res.installing || res.waiting || res.active; });
+
+        // send store request
+        worker.postMessage({
+            version: "0.2",
+            action: "store",
+            scope: scope,
+            key: key
+        });
+    }
+
+    setCacheBehavior(style){
+
     }
 };
 

@@ -23,7 +23,7 @@
     </head>
     <body>
         <script>
-            window.keyring.verify("locked", "password").then(res => {
+            window.keyring.verifyPassword("/locked", "password").then(res => {
                 console.log(res);
             });
         </script>

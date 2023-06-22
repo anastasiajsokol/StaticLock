@@ -14,6 +14,7 @@
     
     scopes: object
         indexed by scopes, contains scope objects as described below
+        index scopes must begin with a slash '/'
 
 ## Scope Objects
 
@@ -36,6 +37,7 @@
 
     path: string (path)
         resource path relative to parent scope, describes uri of file
+        must begin with '/'
     
     tag: string (base64)
         AES GCM verification tag, 128 bits, needed for file decryption
