@@ -27,6 +27,7 @@ const indexdb = new Promise(resolve => {
     const dbregistration = self.indexedDB.open("keydb", 0.2 * 100); // version 0.2, modified by 100 to support 3 version digits (ex 0.200 can be different from 0.201, but not 0.2001!)
 
     dbregistration.onupgradeneeded = event => {
+        console.log("wiping database");
         const keystore = event.target.result.createObjectStore("keys", { keyPath: "scope" });
         keystore.createIndex("scope", "scope", {unique: true});
     };
@@ -126,6 +127,7 @@ async function getDecryptionInformation(url){
                     key: key,
                     iv: decode(map.scopes[joined_scope].files[file].iv),
                     tag: decode(map.scopes[joined_scope].files[file].tag),
+                    scope: joined_scope,
                 };
             }
 
@@ -200,6 +202,10 @@ self.addEventListener("fetch", (event) => {
                     data: body
                 }, info.key, cyphertext).then(decrypted_body => {
                     return new Response(decrypted_body, response);
+                }).catch(error => {
+                    db.setkey(info.scope, undefined);
+                    console.error("something went wrong with decrypting response - invalidating key");
+                    return response;
                 });
             }
 

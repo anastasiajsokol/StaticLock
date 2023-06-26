@@ -106,6 +106,11 @@ class Keyring {
             throw new Error("cannot register password for scope that is not in map, try Keyring.reloadMap to refresh cache in case of outdated version");
         }
 
+        // verify password - this is for UI, not a security measure
+        if(!await this.verifyPassword(scope, password)){
+            throw new Error(`cannot register invalid password onto scope ${scope}`);
+        }
+
         // read salt from site map
         const exists = (value) => { if(!value){ throw new Error(`invalid scope object at map path ${scope}`); } return value; }
         const decode = (value) => { value = atob(value); return new Uint8Array(value.length).map((_, i, __) => value.charCodeAt(i)); }
