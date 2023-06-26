@@ -46,6 +46,10 @@
         </div>
 
         <script>
+            if(!window.keyring){
+                alert("missing keyring!");
+            }
+
             document.getElementById("passwordinput")?.addEventListener("input", async event => {
                 if(await window.keyring?.verifyPassword("/locked", event.target.value)){
                     window.keyring.registerScope("/locked", "password").then(res => {
