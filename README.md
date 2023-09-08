@@ -1,3 +1,5 @@
+# Deprecated
+
 # Static Lock Version 0.2
 
     Toolchain for easily adding password protected content to a static website
