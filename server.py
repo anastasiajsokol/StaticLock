@@ -1,7 +1,7 @@
 """
     Testing Server
         replace with static server in development!
-        note that to use web crypto api and service workers either localhost or https is needed
+        note that to use web crypto api and service workers either localhost or https is needed (self signed https may not function)
     
     self-signed ssl option
         openssl req  -nodes -new -x509  -keyout cert/key.pem -out cert/cert.pem
