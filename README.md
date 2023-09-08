@@ -1,10 +1,39 @@
 # Static Lock Toolchain
 
+A system for adding password-locked content in a way that is compatable with a static website.
+
 ## Development Tools
 
 The development command line tool is named `staticlock` and serves to make it easy for you to secure directories before deploying your static site.
 
     WARNING: unlocked raw directories should not be uploaded to the site if they should be 'locked', make sure that you only upload the corresponding locked directory
+
+#### Command Line Interface
+
+There are a number of base commands, it is required at least on of these is used. Each may be followed by sub commands to customize execution.
+
+    -c, --create must be followed by a name for the project, setups project in a subdirectory of the current directory with the provided name
+
+        this command can be used with -w or --web to specify the web base directory (highly recommended) defaults to /web
+        this command can be used with -b or --base to specify the lock base directory relative to the web base directory (recommended not to be an empty path) defaults to /lock
+        this command can be used with --liscense to also provide a copy of The Unliscense (you will have to setup other liscense systems yourself)
+    
+    -l, --lock followed by the raw directory to lock, when page is built will output to a directory of the same name in the lock base directory
+
+        this command can be used with --rename followed by a new name to place directory in a lock base subdirectory with the new name instead of same name
+        this command can be used with -f or --force to prevent the default error if the raw directory is also in the web base
+            warning: if this is the case it is likely that an unlocked version of your directory will also be hosted, only use -f if you have a good reason
+    
+    -b, --build builds the current project
+
+    -s, --settings modify project configuration file through a short setup interface
+
+        this command can be used with -d or --default to output a default configuration
+        this command can be used with all the same subcommands as --create
+
+    -v, --version print a short message with the version information of the staticlock command, note that the command tool and library should be the same
+
+    -h, --help prints out a help page similar to this section
 
 ## Library
 
