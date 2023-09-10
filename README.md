@@ -21,6 +21,7 @@ There are a number of base commands, it is required at least on of these is used
     
     -l, --lock followed by the raw directory to lock, when page is built will output to a directory of the same name in the lock base directory
 
+        this command can be used with -f or --file to specify the configuration file to use, defaults to staticlock.json in project directory
         this command can be used with --rename followed by a new name to place directory in a lock base subdirectory with the new name instead of same name
         this command can be used with -f or --force to prevent the default error if the raw directory is also in the web base
             warning: if this is the case it is likely that an unlocked version of your directory will also be hosted, only use -f if you have a good reason
