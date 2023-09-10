@@ -14,8 +14,9 @@ There are a number of base commands, it is required at least on of these is used
 
     -c, --create must be followed by a name for the project, setups project in a subdirectory of the current directory with the provided name
 
-        this command can be used with -w or --web to specify the web base directory (highly recommended) defaults to /web
-        this command can be used with -b or --base to specify the lock base directory relative to the web base directory (recommended not to be an empty path) defaults to /lock
+        this command can be used with -w or --web to specify the web base directory (highly recommended not an empty path) defaults to 'web'
+            note: to set web base directory to project directory you must understand enough to enter an empty path
+        this command can be used with -b or --base to specify the lock base directory relative to the web base directory (recommended not to be an empty path) defaults to 'locked'
         this command can be used with --liscense to also provide a copy of The Unliscense (you will have to setup other liscense systems yourself)
     
     -l, --lock followed by the raw directory to lock, when page is built will output to a directory of the same name in the lock base directory
@@ -31,7 +32,7 @@ There are a number of base commands, it is required at least on of these is used
     -s, --settings modify project configuration file through a short setup interface
 
         this command can be used with -d or --default to output a default configuration
-        this command can be used with all the same subcommands as --create
+        this command can be used with all the same subcommands as create
 
     -v, --version print a short message with the version information of the staticlock command, note that the command tool and library should be the same
 
