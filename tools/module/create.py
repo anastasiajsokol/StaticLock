@@ -2,7 +2,6 @@ import shutil   # defiles shutil.copyfile
 import os       # defines os.path.* and os.curdir
 
 from .response import Response
-from . import settings
 
 class Config:
     """Holds all logic for parsing arguments to create command"""
@@ -140,20 +139,6 @@ def run(arguments: list, tool_directory: str) -> Response:
     if(config.lisence):
         shutil.copyfile(os.path.join(tool_directory, "LISCENSE"), os.path.join(project_directory, "LISCENSE"))
     
-    # create default settings
-    old_current_directory = os.path.abspath(os.curdir)  # otherwise could just be '.'
-    os.chdir(project_directory)                         # set current directory to project directory
-    res = settings.run(['--d'], tool_directory)         # setup default settings
-    os.chdir(old_current_directory)                     # swap back to expected current directory
-
-    if(res.status != Response.OK):
-        # cleanup
-        try:
-            shutil.rmtree(project_directory)
-        except:
-            return Response("Create", Response.ERROR, "Error cleaning half-formed project after error creating default settings")
-        
-        # something went wrong setting up default configuration
-        return res
+    # create default settings TODO
     
     return Response("Create", Response.OK, f"Created staticlock project {config.name}")

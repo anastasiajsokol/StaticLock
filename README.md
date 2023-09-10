@@ -29,12 +29,7 @@ There are a number of base commands, it is required at least on of these is used
 
         this command can be used with -f or --file to specify the configuration file to use, defaults to staticlock.json (see docs/staticlock/configuration.md for format)
         this command can be used with --library followed by an output directory to specify a path relative to the web directory to place the static lock library files
-
-    -s, --settings modify project configuration file through a short setup interface
-
-        this command can be used with -d or --default to output a default configuration
-        this command can be used with all the same subcommands as create
-
+    
     -v, --version print a short message with the version information of the staticlock command, note that the command tool and library should be the same
 
     -h, --help prints out a help page similar to this section

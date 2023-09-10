@@ -6,7 +6,7 @@ The build command (-b or --build) is expected to read the project configuration 
 
 ## Required Format
 
-Note: it is recommended that any changes to the configuration are done using the settings and lock commands, not manually editing the file.
+Note: it is recommended that any changes to the configuration are made using the lock command, not manually editing the file.
 
 Configuration files are stored as json files with the following mandatory sections.
 

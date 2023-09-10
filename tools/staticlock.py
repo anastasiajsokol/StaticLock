@@ -14,7 +14,6 @@ from module.response import Response
 import module.create as create
 import module.lock as lock
 import module.build as build
-import module.settings as settings
 import module.version as version
 import module.help as help
 
@@ -28,8 +27,6 @@ def commandinterface(command: str, subcommands: list, tool_directory: str) -> Re
         '--lock': lock,
         '-b': build,
         '--build': build,
-        '-s': settings,
-        '--settings': settings,
         '-v': version,
         '--version': version,
         '-h': help,
