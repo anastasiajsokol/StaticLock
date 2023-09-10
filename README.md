@@ -25,8 +25,9 @@ There are a number of base commands, it is required at least on of these is used
         this command can be used with -f or --force to prevent the default error if the raw directory is also in the web base
             warning: if this is the case it is likely that an unlocked version of your directory will also be hosted, only use -f if you have a good reason
     
-    -b, --build builds the current project using the configuration file, defaults to staticlock.json if none is provided
+    -b, --build builds the current project using the configuration file
 
+        this command can be used with -f or --file to specify the configuration file to use, defaults to staticlock.json (see docs/staticlock/configuration.md for format)
         this command can be used with --library followed by an output directory to specify a path relative to the web directory to place the static lock library files
 
     -s, --settings modify project configuration file through a short setup interface
