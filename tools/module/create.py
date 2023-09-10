@@ -1,7 +1,9 @@
 import shutil   # defiles shutil.copyfile
+import json     # defines json.dumps
 import os       # defines os.path.* and os.curdir
 
 from .response import Response
+from .version import VERSION
 
 class Config:
     """Holds all logic for parsing arguments to create command"""
@@ -139,6 +141,42 @@ def run(arguments: list, tool_directory: str) -> Response:
     if(config.lisence):
         shutil.copyfile(os.path.join(tool_directory, "LISCENSE"), os.path.join(project_directory, "LISCENSE"))
     
-    # create default settings TODO
+    # create default settings
+    default_configuration = {
+        "version": VERSION,
+        "name": config.name,
+        "web": config.web,
+        "base": config.base,
+        "directories": []
+    }
+
+    # helper function for writing to file
+    def writefile(path: str, content: str) -> Response:
+        try:
+            # writing to file
+            with open(path, "w") as file:
+                file.write(content)
+            
+            return Response("Create", Response.OK, "wrote content to file")
+        except:
+            # failed writing to file
+            try:
+                # cleanup
+                shutil.rmtree(project_directory)
+            except:
+                # cleanup also failed
+                return Response("Create", Response.ERROR, f"Failed to cleanup project directory after failed to write to file {path}")
+            
+            return Response("Create", Response.ERROR, f"Failed to write to file {path}")
     
+    res = writefile(os.path.join(project_directory, "staticlock.json"), json.dumps(default_configuration))
+
+    if(res.status != Response.OK):
+        return res
+    
+    res = writefile(os.path.join(web_directory, "index.html"), "<h1>Hello World</h1>")
+
+    if(res.status != Response.OK):
+        return res
+
     return Response("Create", Response.OK, f"Created staticlock project {config.name}")
