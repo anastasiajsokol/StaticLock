@@ -38,7 +38,7 @@ def commandinterface(command: str, subcommands: list, tool_directory: str) -> Re
 
     # run module (if it exists)
     if command in module_map:
-        return module_map[command].run(subcommands)
+        return module_map[command].run(subcommands, tool_directory)
     else:
         return Response("Command Interface", Response.ERROR, f"No staticlock base command corresponds to tag '{command}', use -h or --help for more information")
 

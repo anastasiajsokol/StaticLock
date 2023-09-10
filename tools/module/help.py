@@ -1,6 +1,6 @@
 from .response import Response
 
-def run(arguments: list) -> Response:
+def run(arguments: list, _: str) -> Response:
     # information
     version = "v0.1"
     header = f"StaticLock Toolchain {version}\n"
