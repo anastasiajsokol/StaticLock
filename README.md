@@ -49,6 +49,6 @@ First download the files into whatever directory you use to store tools (if you 
 
 There are a couple ways to properly alias the `staticlock` command. The first thing is you will need to know the absolute path of the file `tools/staticlock.py`. If you have the command `realpath` installed you can get this by running `realpath tools/staticlock.py` from the repository root directory, otherwise you will have to get it some other way (whatever the tools directory you choose, joined with `StaticLock/tools/staticlock.py`).
 
-Then there are two options. If you have python installed to `/usr/bin/python3` (check by running `/usr/bin/python3 --version`) then you can use `alias staticlock=PATH` replacing `PATH` with whatever the absolute directory you used is. Otherwise, use `alias staticlock="python3 PATH"` - possibly switching out the python command for whatever command it is setup as on your system and again switching out `PATH` for the absolute path you found.
+Then there are two options. If you have python installed to `/usr/bin/python3` (check by running `/usr/bin/python3 --version`) then you can use `alias staticlock=PATH` replacing `PATH` with whatever the absolute path you found was. Otherwise, use `alias staticlock="python3 PATH"` - possibly switching out the python command for whatever command it is setup as on your system and again switching out `PATH` for the absolute path you found.
 
 To make the alias persistant across terminal sessions add the alias command to your `~/.bashrc` or equivalent file.
