@@ -69,7 +69,7 @@ class Config:
         if(len(arguments) == 0):
             # error state
             self.ok = False
-            self.message = Response("Create", Response.ERROR, "The 'create' command requires a project name as it's first (and only required) argument")
+            self.message = Response("Create", Response.ERROR, "The create command requires a project name as it's first (and only required) argument")
             return
         
         self.name = arguments[0]
@@ -107,7 +107,7 @@ class Config:
         # at this point - no matter what - arguments should be empty
         if(len(arguments) != 0):
             self.ok = False
-            self.message = Response("Create", Response.ERROR, f"Unexpected extra arguments passed to the 'create' command {arguments}")
+            self.message = Response("Create", Response.ERROR, f"Unexpected extra arguments passed to the create command {arguments}")
             return
 
 def run(arguments: list, tool_directory: str) -> Response:
