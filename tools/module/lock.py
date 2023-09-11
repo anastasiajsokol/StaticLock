@@ -3,7 +3,8 @@ import os   # defines os.path.*
 from .response import Response
 
 class Config:
-    __slots__ = ["ok", "message", "file", "input", "output"]
+    """Parse input arguments into safe fields"""
+    __slots__ = ["ok", "message", "file", "input", "output", "force"]
 
     def _find(collection: list, item: any) -> any:
         """Get the index of item in collection or the value None"""
@@ -11,9 +12,27 @@ class Config:
         return collection.index(item) if item in collection else None
 
     def _is_subdirectory(base: str, path: str) -> bool:
+        """Check if path is subdirectory of base"""
         base = os.path.abspath(base)
         path = os.path.abspath(path)
         return base != path and base == os.path.commonpath([base, path])
+    
+    def _read_argument(arguments: list, tag: str, default: str) -> tuple:
+        """Attempt to read tag"""
+        index = Config._find(arguments, tag)
+
+        if(index == None):
+            return (True, default)
+
+        if(index == len(arguments) - 1):
+            return (False, Response("Lock", Response.ERROR, f"Expected a path following the {tag} tag"))
+        
+        path = arguments[index + 1]
+
+        del arguments[index + 1]
+        del arguments[index]
+
+        return (True, path)
 
     def __init__(self, arguments: list):
         self.ok = True
@@ -35,10 +54,21 @@ class Config:
             # in this case do not check input and output directories for sanity, remove from arguments
             del arguments[force]
         
-        force = force != None   # convert to a boolean just for easier use later
+        self.force = force != None
 
         # get output directory
+        self.ok, self.output = Config._read_argument(arguments, "--rename", self.input)
 
+        if(not self.ok):
+           self.message = self.input
+           return 
+        
+        # get configuration file
+        self.ok, self.file = Config._read_argument(arguments, "--file", "staticlock.json")
+
+        if(not self.ok):
+            self.message = self.file
+            return
 
 def run(arguments: list, _: str) -> Response:
     return Response("Lock", Response.ERROR, "The lock command is not yet implemented")
