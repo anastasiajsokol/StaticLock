@@ -1,6 +1,8 @@
 import os   # defines os.path.*
+import json # defines json.load
 
 from .response import Response
+from .version import VERSION
 
 class Config:
     """Parse input arguments into safe fields"""
@@ -69,16 +71,76 @@ class Config:
         if(not self.ok):
             self.message = self.file
             return
+        
+        if(len(arguments) != 0):
+            self.ok = False
+            self.message = Response("Lock", Response.ERROR, f"Unexpected extra arguments passed to the lock command {arguments}")
+            return
 
 def run(arguments: list, _: str) -> Response:
     config = Config(arguments)
     
     if(not config.ok):
         return config.message
+    
+    # attempt to read configuration file
+    data = {}
 
-    print("File:", config.file)
-    print("Force:", config.force)
-    print("Input:", config.input)
-    print("Output:", config.output)
+    try:
+        with open(config.file, "r") as configuration:
+            data = json.load(configuration)
+    except:
+        return Response("Lock", Response.ERROR, f"Unable to open configuration file {config.file} for reading")
 
-    return Response("Lock", Response.ERROR, "The lock command is not yet implemented")
+    # make sure versions match
+    if(data.get("version", None) == None):
+        return Response("Lock", Response.ERROR, f"Provided configuration [{config.file}] does not have a version field")
+    elif(data["version"] != VERSION):
+        return Response("Lock", Response.ERROR, f"Version of configuration file does not match the version of this tool [{data['version']} is not {VERSION}] look into updating the tool or migrating your project")
+
+    # map out structure
+    project_base = os.path.abspath(os.curdir)
+    web_base = None
+    staticlock_base = None
+
+    try:
+        web_base = os.path.join(project_base, data["web"])
+        staticlock_base = os.path.join(web_base, data["base"])
+    except:
+        return Response("Lock", Response.ERROR, f"Unable to read information about project directory structure from provided configuration [{config.file}]")
+    
+    # get directories entry
+    directories = data.get("directories")
+
+    if(directories == None):
+        return Response("Lock", Response.ERROR, f"Unable to read current directory information from [{config.file}]")
+
+    if(not config.force):
+        # make sure that this entry will not be messing with another entry
+        for directory in directories:
+            if(directory.get("input") == config.input):
+                return Response("Lock", Response.ERROR, f"There is already a lock entry for input {config.input}")
+            if(directory.get("output") == config.output):
+                return Response("Lock", Response.ERROR, f"There is already a lock entry outputing to {config.output}")
+
+        # check that input and output directories are "safe" (where they should be)
+        if(Config._is_subdirectory(web_base, os.path.join(project_base, config.input))):
+            return Response("Lock", Response.ERROR, "Unable to lock a directory located in web base directory - see README.md for more information, warnings, and workarounds")
+        if(not Config._is_subdirectory(staticlock_base, os.path.join(staticlock_base, config.output))):
+            return Response("Lock", Response.ERROR, "The output directory should be a subdirectory of the staticlock base - see README.md for more information, warnings, and workarounds")
+
+    directories.append({
+        "input": config.input,
+        "output": config.output
+    })
+
+    # attempt to write data back to configuration
+    data["directories"] = directories
+
+    try:
+        with open(config.file, "w") as configuration:
+            json.dump(data, configuration)
+    except:
+        return Response("Lock", Response.ERROR, f"Unable to write new configuration back to file {config.file}")
+
+    return Response("Lock", Response.OK, f"Locked {config.input} to {config.output}")
