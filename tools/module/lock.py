@@ -60,7 +60,7 @@ class Config:
         self.ok, self.output = Config._read_argument(arguments, "--rename", self.input)
 
         if(not self.ok):
-           self.message = self.input
+           self.message = self.output
            return 
         
         # get configuration file
@@ -75,5 +75,10 @@ def run(arguments: list, _: str) -> Response:
     
     if(not config.ok):
         return config.message
+
+    print("File:", config.file)
+    print("Force:", config.force)
+    print("Input:", config.input)
+    print("Output:", config.output)
 
     return Response("Lock", Response.ERROR, "The lock command is not yet implemented")
