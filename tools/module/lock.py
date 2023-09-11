@@ -29,18 +29,16 @@ class Config:
         arguments = arguments[1:]
 
         # check force arguments first (since it is used later)
-        short_force = Config._find(arguments, "-f")
-        long_force = Config._find(arguments, "--force")
-
-        force = short_force if short_force != None else long_force  # defining both is not great, but not worth throwing an error over, at least not yet
-
+        force = Config._find(arguments, "--force")
+        
         if(force != None):
             # in this case do not check input and output directories for sanity, remove from arguments
             del arguments[force]
         
         force = force != None   # convert to a boolean just for easier use later
 
-        # TODO finish
+        # get output directory
+
 
 def run(arguments: list, _: str) -> Response:
     return Response("Lock", Response.ERROR, "The lock command is not yet implemented")
