@@ -71,4 +71,9 @@ class Config:
             return
 
 def run(arguments: list, _: str) -> Response:
+    config = Config(arguments)
+    
+    if(not config.ok):
+        return config.message
+
     return Response("Lock", Response.ERROR, "The lock command is not yet implemented")
