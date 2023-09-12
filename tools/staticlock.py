@@ -11,11 +11,11 @@
 from module.response import Response, Entry
 
 # base command modules
-import tools.module.bad.create as create
-import tools.module.bad.lock as lock
-import tools.module.bad.build as build
-import tools.module.bad.version as version
-import tools.module.bad.help as help
+import module.create as create
+import module.lock as lock
+import module.build as build
+import module.version as version
+import module.help as help
 
 # dispatch to base command module
 def commandinterface(command: str, subcommands: list, tool_directory: str) -> Response:
