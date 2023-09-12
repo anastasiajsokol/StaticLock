@@ -21,23 +21,18 @@ import module.help as help
 def commandinterface(command: str, subcommands: list, tool_directory: str) -> Response:
     # map commands onto corresponding modules
     module_map = {
-        '-c': create,
-        '--create': create,
-        '-l': lock,
-        '--lock': lock,
-        '-b': build,
-        '--build': build,
-        '-v': version,
-        '--version': version,
-        '-h': help,
-        '--help': help
+        'create': create,
+        'lock': lock,
+        'build': build,
+        'version': version,
+        'help': help
     }
 
     # run module (if it exists)
     if command in module_map:
         return module_map[command].run(subcommands, tool_directory)
     else:
-        return Response("Command Interface", Response.ERROR, f"No staticlock base command corresponds to tag '{command}', use -h or --help for more information")
+        return Response().add(Entry("Command Interface", Response.ERROR, f"No staticlock base command corresponds to '{command}', use help for more information"))
 
 if __name__ == "__main__":
     from sys import argv, exit
@@ -45,7 +40,7 @@ if __name__ == "__main__":
 
     if len(argv) == 1:
         # without a base command staticlock can not do anything
-        print(Response().add(Entry("Command Parser", Response.ERROR, "the staticlock build tool requires at least a base command, use the command -h or --help for more information")))
+        print(Response().add(Entry("Command Parser", Response.ERROR, "The staticlock build tool requires at least a base command, use the command help for more information")))
         exit(1)
     
     tool, command, *arguments = argv
