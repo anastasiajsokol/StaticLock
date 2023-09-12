@@ -1,7 +1,7 @@
 import os   # defines os.path.*
 import json # defines json.load
 
-from .response import Response
+from .response import Response, Entry
 from .version import VERSION
 
 class Config:
@@ -27,7 +27,7 @@ class Config:
             return (True, default)
 
         if(index == len(arguments) - 1):
-            return (False, Response("Lock", Response.ERROR, f"Expected a path following the {tag} tag"))
+            return (False, Response().add(Entry("Lock", Response.ERROR, f"Expected a path following the {tag} tag")))
         
         path = arguments[index + 1]
 
@@ -42,7 +42,7 @@ class Config:
         if(len(arguments) == 0):
             # must have at least an input directory
             self.ok = False
-            self.message = Response("Lock", Response.ERROR, "The lock command requires a path to the directory to be locked")
+            self.message = Response().add(Entry("Lock", Response.ERROR, "The lock command requires a path to the directory to be locked"))
             return
         
         # remove the input directory from arguments
@@ -74,7 +74,7 @@ class Config:
         
         if(len(arguments) != 0):
             self.ok = False
-            self.message = Response("Lock", Response.ERROR, f"Unexpected extra arguments passed to the lock command {arguments}")
+            self.message = Response().add(Entry("Lock", Response.ERROR, f"Unexpected extra arguments passed to the lock command {arguments}"))
             return
 
 def run(arguments: list, _: str) -> Response:
@@ -90,13 +90,13 @@ def run(arguments: list, _: str) -> Response:
         with open(config.file, "r") as configuration:
             data = json.load(configuration)
     except:
-        return Response("Lock", Response.ERROR, f"Unable to open configuration file {config.file} for reading")
+        return Response().add(Entry("Lock", Response.ERROR, f"Unable to open configuration file {config.file} for reading"))
 
     # make sure versions match
     if(data.get("version", None) == None):
-        return Response("Lock", Response.ERROR, f"Provided configuration [{config.file}] does not have a version field")
+        return Response().add(Entry("Lock", Response.ERROR, f"Provided configuration [{config.file}] does not have a version field"))
     elif(data["version"] != VERSION):
-        return Response("Lock", Response.ERROR, f"Version of configuration file does not match the version of this tool [{data['version']} is not {VERSION}] look into updating the tool or migrating your project")
+        return Response().add(Entry("Lock", Response.ERROR, f"Version of configuration file does not match the version of this tool [{data['version']} is not {VERSION}] look into updating the tool or migrating your project"))
 
     # map out structure
     project_base = os.path.abspath(os.curdir)
@@ -107,27 +107,27 @@ def run(arguments: list, _: str) -> Response:
         web_base = os.path.join(project_base, data["web"])
         staticlock_base = os.path.join(web_base, data["base"])
     except:
-        return Response("Lock", Response.ERROR, f"Unable to read information about project directory structure from provided configuration [{config.file}]")
+        return Response().add(Entry("Lock", Response.ERROR, f"Unable to read information about project directory structure from provided configuration [{config.file}]"))
     
     # get directories entry
     directories = data.get("directories")
 
     if(directories == None):
-        return Response("Lock", Response.ERROR, f"Unable to read current directory information from [{config.file}]")
+        return Response().add(Entry("Lock", Response.ERROR, f"Unable to read current directory information from [{config.file}]"))
 
     if(not config.force):
         # make sure that this entry will not be messing with another entry
         for directory in directories:
             if(directory.get("input") == config.input):
-                return Response("Lock", Response.ERROR, f"There is already a lock entry for input {config.input}")
+                return Response().add(Entry("Lock", Response.ERROR, f"There is already a lock entry for input {config.input}"))
             if(directory.get("output") == config.output):
-                return Response("Lock", Response.ERROR, f"There is already a lock entry outputing to {config.output}")
+                return Response().add(Entry("Lock", Response.ERROR, f"There is already a lock entry outputing to {config.output}"))
 
         # check that input and output directories are "safe" (where they should be)
         if(Config._is_subdirectory(web_base, os.path.join(project_base, config.input))):
-            return Response("Lock", Response.ERROR, "Unable to lock a directory located in web base directory - see README.md for more information, warnings, and workarounds")
+            return Response().add(Entry("Lock", Response.ERROR, "Unable to lock a directory located in web base directory - see README.md for more information, warnings, and workarounds"))
         if(not Config._is_subdirectory(staticlock_base, os.path.join(staticlock_base, config.output))):
-            return Response("Lock", Response.ERROR, "The output directory should be a subdirectory of the staticlock base - see README.md for more information, warnings, and workarounds")
+            return Response().add(Entry("Lock", Response.ERROR, "The output directory should be a subdirectory of the staticlock base - see README.md for more information, warnings, and workarounds"))
 
     directories.append({
         "input": config.input,
@@ -141,6 +141,6 @@ def run(arguments: list, _: str) -> Response:
         with open(config.file, "w") as configuration:
             json.dump(data, configuration)
     except:
-        return Response("Lock", Response.ERROR, f"Unable to write new configuration back to file {config.file}")
+        return Response().add(Entry("Lock", Response.ERROR, f"Unable to write new configuration back to file {config.file}"))
 
-    return Response("Lock", Response.OK, f"Locked {config.input} to {config.output}")
+    return Response().add(Entry("Lock", Response.OK, f"Locked {config.input} to {config.output}"))
