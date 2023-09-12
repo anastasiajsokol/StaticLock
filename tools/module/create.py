@@ -2,7 +2,7 @@ import shutil   # defiles shutil.copyfile
 import json     # defines json.dumps
 import os       # defines os.path.* and os.curdir
 
-from .response import Response
+from .response import Response, Entry
 from .version import VERSION
 
 class Config:
@@ -28,14 +28,13 @@ class Config:
     
     def _read_directory(arguments: list, short_tag: str, full_tag: str, base: str, directory_name: str, base_name: str, default: str) -> tuple:
         """Attempt to read directory specified for web or staticlock base directories"""
-
         # check if tag even exists
         short_tag_index = Config._find(arguments, short_tag)
         full_tag_index = Config._find(arguments, full_tag)
 
         if(short_tag_index != None and full_tag_index != None):
             # only one tag or the other is allowed
-            return (False, Response("Create", Response.ERROR, f"Either the {short_tag} or {full_tag} can be used, not both"))
+            return (False, Response().add(Entry("Create", Response.ERROR, f"Either the {short_tag} or {full_tag} can be used, not both")))
 
         tag = short_tag_index if short_tag_index != None else full_tag_index
 
@@ -43,7 +42,7 @@ class Config:
             # make sure it is not a trailing tag
             if(tag == len(arguments) - 1):
                 # attempted to 
-                return (False, Response("Create", Response.ERROR, f"If {directory_name} is manually set, some path must be provided (see README.md for empty path)"))
+                return (False, Response().add(Entry("Create", Response.ERROR, f"If {directory_name} is manually set, some path must be provided (see README.md for empty path)")))
             
             # read provided path
             directory = arguments[tag + 1]
@@ -51,7 +50,7 @@ class Config:
             # double check that nothing bad is happening... like a backwards path
             if(Config._suspicious_path(base, os.path.abspath(os.path.join(base, directory)))):
                 # attempts to do something sneaky with backwards referencing or other iffy constructions, this is not allowed
-                return (False, Response("Create", Response.ERROR, f"The {directory_name} must be a subdirectory of the {base_name}"))
+                return (False, Response().add(Entry("Create", Response.ERROR, f"The {directory_name} must be a subdirectory of the {base_name}")))
             
             # remove arguments
             del arguments[tag + 1]
@@ -70,7 +69,7 @@ class Config:
         if(len(arguments) == 0):
             # error state
             self.ok = False
-            self.message = Response("Create", Response.ERROR, "The create command requires a project name as it's first (and only required) argument")
+            self.message = Response().add(Entry("Create", Response.ERROR, "The create command requires a project name as it's first (and only required) argument"))
             return
         
         self.name = arguments[0]
@@ -78,7 +77,7 @@ class Config:
         if(Config._complex_path(self.name)):
             # unable to make a project with a name that can not also be the name of a directory
             self.ok = False
-            self.message = Response("Create", Response.ERROR, "The project name must be a valid directory name")
+            self.message = Response().add(Entry("Create", Response.ERROR, "The project name must be a valid directory name"))
             return
 
         project_base_path = os.path.join(os.curdir, self.name)  # used later for parsing web base and staticlock base
@@ -108,7 +107,7 @@ class Config:
         # at this point - no matter what - arguments should be empty
         if(len(arguments) != 0):
             self.ok = False
-            self.message = Response("Create", Response.ERROR, f"Unexpected extra arguments passed to the create command {arguments}")
+            self.message = Response().add(Entry("Create", Response.ERROR, f"Unexpected extra arguments passed to the create command {arguments}"))
             return
 
 def run(arguments: list, tool_directory: str) -> Response:
@@ -127,7 +126,7 @@ def run(arguments: list, tool_directory: str) -> Response:
         os.mkdir(project_directory)
     except:
         # this means the project directory already exists
-        return Response("Create", Response.ERROR, "Unable to create project with same name as an already existing subdirectory")
+        return Response().add(Entry("Create", Response.ERROR, "Unable to create project with same name as an already existing subdirectory"))
 
     # create web base directory
     if web_directory != project_directory:
@@ -157,7 +156,7 @@ def run(arguments: list, tool_directory: str) -> Response:
             with open(path, "w") as file:
                 file.write(content)
             
-            return Response("Create", Response.OK, "wrote content to file")
+            return Response().add(Entry("Create", Response.OK, "wrote content to file"))
         except:
             # failed writing to file
             try:
@@ -165,9 +164,9 @@ def run(arguments: list, tool_directory: str) -> Response:
                 shutil.rmtree(project_directory)
             except:
                 # cleanup also failed
-                return Response("Create", Response.ERROR, f"Failed to cleanup project directory after failed to write to file {path}")
+                return Response().add(Entry("Create", Response.ERROR, f"Failed to cleanup project directory after failed to write to file {path}"))
             
-            return Response("Create", Response.ERROR, f"Failed to write to file {path}")
+            return Response().add(Entry("Create", Response.ERROR, f"Failed to write to file {path}"))
     
     res = writefile(os.path.join(project_directory, "staticlock.json"), json.dumps(default_configuration))
 
@@ -179,4 +178,4 @@ def run(arguments: list, tool_directory: str) -> Response:
     if(res.status != Response.OK):
         return res
 
-    return Response("Create", Response.OK, f"Created staticlock project {config.name}")
+    return Response().add(Entry("Create", Response.OK, f"Created staticlock project {config.name}"))
