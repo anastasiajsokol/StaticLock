@@ -1,6 +1,6 @@
 from .response import Response, Entry
 
-class Parser:
+class ArgumentParser:
     def __init__(self, arguments: list):
         # store different kinds of arguments
         self._flags = set()
