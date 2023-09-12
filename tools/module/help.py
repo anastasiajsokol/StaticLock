@@ -1,6 +1,8 @@
-from .response import Response
+from .response import Response, Entry
 
 def run(arguments: list, _: str) -> Response:
+    res = Response()
+
     # information
     version = "v0.1"
     header = f"StaticLock Toolchain {version}\n"
@@ -32,8 +34,7 @@ def run(arguments: list, _: str) -> Response:
         elif name == "help":
             message = f"StaticLock Toolchain {version} Help\n\t\tTags: -h, --help\n\t\tSub Commands\n" + sub_help[2 + len(name) + 1:]
         else:
-            status = Response.ERROR
-            message = f"StaticLock Toolchain {version} does not have a command [{name}] "
+            res.add(Entry("Help", Response.WARNING, f"StaticLock Toolchain {version} does not have a command [{name}]"))
     else:
         if(len(arguments) != 0):
             # error case
@@ -43,4 +44,4 @@ def run(arguments: list, _: str) -> Response:
         # normal case (possibly composed with error case)
         message += header + base_commands + sub_commands
         
-    return Response("Help", status, message + "Please see the README.md file for more information")
+    return res.add(Entry("Help", status, message + "Please see the README.md file for more information"))

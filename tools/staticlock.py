@@ -8,7 +8,7 @@
 """
 
 # command state response interface
-from module.response import Response
+from module.response import Response, Entry
 
 # base command modules
 import module.create as create
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     if len(argv) == 1:
         # without a base command staticlock can not do anything
-        print(Response("Command Parser", Response.ERROR, "the staticlock build tool requires at least a base command, use the command -h or --help for more information"))
+        print(Response().add(Entry("Command Parser", Response.ERROR, "the staticlock build tool requires at least a base command, use the command -h or --help for more information")))
         exit(1)
     
     tool, command, *arguments = argv

@@ -1,8 +1,11 @@
-from .response import Response
+from .response import Response, Entry
 
 VERSION = "0.1"
 
 def run(arguments: list, _: str) -> Response:
+    res = Response()
+    
     if(len(arguments) != 0):
-        return Response("Version", Response.WARNING, f"StaticLock Toolchain v{VERSION} does not accept arguments to version command")
-    return Response("Version", Response.INFO, f"StaticLock Toolchain v{VERSION}")
+        res.add(Entry("Version", Response.WARNING, f"The version command does not accept any arguments"))
+    
+    return res.add(Entry("Version", Response.INFO, f"StaticLock Toolchain v{VERSION}"))
