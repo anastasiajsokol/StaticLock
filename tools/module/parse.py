@@ -1,3 +1,5 @@
+import os   # defines os.path
+
 from .response import Response, Entry
 
 class ArgumentParser:
@@ -60,3 +62,12 @@ class ArgumentParser:
     def __bool__(self):
         """check if the object is valid (aka no errors)"""
         return self.response.status < Response.ERROR
+
+def path_is_child(parent: str, child: str) -> bool:
+    parent = os.path.abspath(parent)
+    child = os.path.abspath(child)
+    return parent != child and parent == os.path.commonpath([parent, child])
+
+def path_is_complex(path: str) -> bool:
+    base, _ = os.path.split(path)
+    return base != ''
