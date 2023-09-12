@@ -1,5 +1,5 @@
 from ..response import Response
-from .security import encrypt
+from ..security import encrypt
 
 class Config:
     def __init__(self, arguments: list):
