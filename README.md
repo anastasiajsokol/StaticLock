@@ -1,8 +1,8 @@
-# Static Lock Toolchain
+# StaticLock Toolchain
 
-A system for adding password-locked content to static websites.
+Tool for smoothly adding password protected content without a trusted oracle.
 
-## Development Tools
+## Development Tool
 
 The development command line tool is named `staticlock` and serves to make it easy for you to secure directories before deploying your static site.
 
@@ -10,32 +10,55 @@ The development command line tool is named `staticlock` and serves to make it ea
 
 #### Command Line Interface
 
-There are a number of base commands, it is required at least on of these is used. Each may be followed by sub commands to customize execution.
-
-    -c, --create must be followed by a name for the project, setups project in a subdirectory of the current directory with the provided name
-
-        this command can be used with -w or --web to specify the web base directory (highly recommended not an empty path) defaults to 'web'
-            note: to set web base directory to project directory you must understand enough to enter an empty path
-        this command can be used with -b or --base to specify the lock base directory relative to the web base directory (recommended not to be an empty path) defaults to 'locked'
-        this command can be used with --liscense to also provide a copy of The Unliscense (you will have to setup other liscense systems yourself)
+    create
+        description: create a new project as a subdirectory of the current directory
+        positional:
+            name of project, must be a 'simple' path
+        tags:
+            --web can be used to specify the project web directory, defaults to 'web'
+                WARNING: must not be an empty path and may not be a backreference
+            --locked can be used to specify where to place locked content, defaults to 'locked'
+            --library specify web subpath to place the library files
+        flags:
+            -liscense provides a copy of The Unliscense for the newly created project
     
-    -l, --lock followed by the raw directory to lock, when page is built will output to a directory of the same name in the lock base directory
+    lock
+        description: setup a lock entry in the configuration file
+        position:
+            raw directory to lock
+        tags:
+            --file specify a configuration file to use, defaults to 'staticlock.json'
+            --rename specify a different name for the output file than the input
+        flags:
+            -force do not validate paths
+                warning: this can result in unsecure configurations
 
-        this command can be used with --file to specify the configuration file to use, defaults to staticlock.json in project directory
-        this command can be used with --rename followed by a new name to place directory in a staticlock base subdirectory with the new name instead of same name
-        this command can be used with --force to prevent the default error if the raw directory is also in the web base
-            warning: if this is the case it is likely that an unlocked version of your directory will also be hosted, only use -f if you have a good reason
+    build
+        description: build a specific configuration
+        position:
+            none
+        tags:
+            --file specify the configuration file to read, defaults to 'staticlock.json'
+        flags:
+            none
     
-    -b, --build builds the current project using the configuration file
-
-        this command can be used with -f or --file to specify the configuration file to use, defaults to staticlock.json (see docs/staticlock/configuration.md for format)
-        this command can be used with --library followed by an output directory to specify a path relative to the web directory to place the static lock library files
+    version
+        description: print out the current version
+        position:
+            none
+        tags:
+            none
+        flags:
+            none
     
-    -v, --version print a short message with the version information of the staticlock command, note that the command tool and library should be the same
-
-    -h, --help prints out a help page similar to this section
-
-        this command may be followed by a base command name, doing so will limit the output to just explain that tag
+    help
+        description: print out usage information for the tool
+        position
+            optional command name, if used only shows related information
+        tags:
+            none
+        flags:
+            none
 
 ## Library
 
