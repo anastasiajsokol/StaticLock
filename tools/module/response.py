@@ -6,16 +6,17 @@ class Response:
     WARNING = 2
     ERROR = 3
 
-    def __init__(self, state = 1):
-        self.state = state
+    def __init__(self, status = 1):
+        self.status = status
         self.entries = []
     
-    def add(self, entry: any) -> None:
+    def add(self, entry: any):
         if(entry.status > self.status):
             self.status = entry.status
         self.entries.append(entry)
+        return self
     
-    def addall(self, entries: list) -> None:
+    def addall(self, entries: list):
         def joined(first: any, rest: iter) -> iter:
             yield first
             for item in rest:
@@ -23,9 +24,10 @@ class Response:
         
         self.status = max(joined(self.status, entries), key = lambda entry : entry.status)
         self.entries.append(*entries)
+        return self
     
     def __iter__(self) -> iter:
-        for entry in self.enties:
+        for entry in self.entries:
             yield entry
 
     def __str__(self) -> str:
@@ -48,6 +50,7 @@ class Entry:
         self.sender = sender
         self.status = status
         self.message = message
+        self.time = datetime.datetime.now()
 
     def log(self) -> str:
         class colors:
@@ -59,12 +62,12 @@ class Entry:
 
         if self.status > 0 and self.status <= 5:
             status = ["info", "ok", "warning", "error"][self.status]
-            color = [colors.DEFAULT, colors.OK, colors.WARNING, colors.ERROR][self.status - 1]
+            color = [colors.DEFAULT, colors.OK, colors.WARNING, colors.ERROR][self.status]
         else:
             status = "unknown"
             color = colors.WARNING
         
-        return f"{color}[{datetime.datetime.now().replace(microsecond=0)}] [{status}] {self.message}{colors.ENDC}"
+        return f"{color}[{self.time.replace(microsecond=0)}] [{status}] {self.message}{colors.ENDC}"
 
     def __str__(self) -> str:
         if self.status != Response.INFO:
