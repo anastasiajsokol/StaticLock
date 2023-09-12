@@ -16,7 +16,12 @@ class Response:
         self.entries.append(entry)
     
     def addall(self, entries: list) -> None:
-        self.status = max(*entries, key = lambda entry : entry.status)
+        def joined(first: any, rest: iter) -> iter:
+            yield first
+            for item in rest:
+                yield item
+        
+        self.status = max(joined(self.status, entries), key = lambda entry : entry.status)
         self.entries.append(*entries)
     
     def __iter__(self) -> iter:
