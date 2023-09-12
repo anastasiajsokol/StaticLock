@@ -1,4 +1,4 @@
-from .response import Response, Entry
+from ..response import Response, Entry
 
 VERSION = "0.1"
 

@@ -1,4 +1,4 @@
-from .response import Response, Entry
+from ..response import Response, Entry
 
 def run(arguments: list, _: str) -> Response:
     res = Response()

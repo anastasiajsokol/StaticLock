@@ -1,7 +1,7 @@
 import os   # defines os.path.*
 import json # defines json.load
 
-from .response import Response, Entry
+from ..response import Response, Entry
 from .version import VERSION
 
 class Config:

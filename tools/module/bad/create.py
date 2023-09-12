@@ -2,7 +2,7 @@ import shutil   # defiles shutil.copyfile
 import json     # defines json.dumps
 import os       # defines os.path.* and os.curdir
 
-from .response import Response, Entry
+from ..response import Response, Entry
 from .version import VERSION
 
 class Config:
