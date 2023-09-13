@@ -1,4 +1,4 @@
-# StaticLock Toolchain
+# StaticLock Toolchain Version 0.3
 
 Tool for smoothly adding password protected content without a trusted oracle.
 
