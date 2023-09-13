@@ -2,6 +2,8 @@
 
 A system for adding password-locked content to static websites.
 
+The newist version is still in active development and some features may not be functional at a given point in time, check out the stable directory for a fully working version!
+
 ## Development Tools
 
 The development command line tool is named `staticlock` and serves to make it easy for you to secure directories before deploying your static site.
