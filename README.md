@@ -76,4 +76,4 @@ There are a couple ways to properly alias the `staticlock` command. The first th
 
 Then there are two options. If you have python installed to `/usr/bin/python3` (check by running `/usr/bin/python3 --version`) then you can use `alias staticlock=PATH` replacing `PATH` with whatever the absolute path you found was. Otherwise, use `alias staticlock="python3 PATH"` - possibly switching out the python command for whatever command it is setup as on your system and again switching out `PATH` for the absolute path you found.
 
-To make the alias persistant across terminal sessions add the alias command to your `~/.bashrc` or equivalent file.
+To make the alias persistent across terminal sessions add the alias command to your `~/.bashrc` or equivalent file.
