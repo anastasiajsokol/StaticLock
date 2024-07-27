@@ -11,8 +11,12 @@
         <h1>StaticLock Example</h1>
 
         <script>
-            window.addEventListener("load", _ => {
+            window.addEventListener("load", async _ => {
                 const staticlock = new StaticLock();
+
+                let worker = await staticlock.get_worker();
+
+                worker.postMessage("Hello world!");
             });
         </script>
     </body>
