@@ -7,23 +7,57 @@
 
 use aes_gcm::{
     aead::{Aead, AeadCore, KeyInit, OsRng},
-    Aes256Gcm
+    Aes256Gcm, Key, Nonce,
 };
 
-fn main(){
-    // The encryption key can be generated randomly:
-    let key = Aes256Gcm::generate_key(OsRng);
+#[derive(Debug)]
+struct DecryptionKey {
+    key: Key<Aes256Gcm>,
+    nonce: Vec<u8>,
+}
+
+fn encrypt_file(path: &String) -> Result<DecryptionKey, std::io::Error> {
+    // generate key and cipher
+    let key: Key<Aes256Gcm> = Aes256Gcm::generate_key(OsRng);
 
     let cipher = Aes256Gcm::new(&key);
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
-    
-    let ciphertext = cipher.encrypt(&nonce, b"plaintext message".as_ref()).expect("Failed to encrypt");
-    
-    println!("{:?}", ciphertext);
 
-    let plaintext = cipher.decrypt(&nonce, ciphertext.as_ref()).expect("Failed to decrypt");
+    let plaintext: &[u8] = &std::fs::read(&path)?;
 
-    println!("{:?}", plaintext);
+    let ciphertext = cipher
+        .encrypt(&nonce, plaintext)
+        .expect("Failed to encrypt");
 
-    assert_eq!(&plaintext, b"plaintext message");
+    std::fs::write(&path, ciphertext)?;
+
+    Ok(DecryptionKey {
+        key: key,
+        nonce: nonce.to_vec(),
+    })
+}
+
+fn decrypt_file(path: &String, key: &DecryptionKey) -> Result<(), std::io::Error> {
+    let ciphertext: &[u8] = &std::fs::read(&path)?;
+
+    let cipher = Aes256Gcm::new(&key.key);
+    let nonce = Nonce::from_slice(&key.nonce);
+
+    let plaintext = cipher.decrypt(&nonce, ciphertext).expect("Failed to decrypt");
+
+    std::fs::write(&path, plaintext)?;
+
+    Ok(())
+}
+
+fn main() {
+    let path: String = "poem.txt".into();
+
+    let key = encrypt_file(&path).expect("oh no!");
+
+    println!("{:?}", key);
+
+    std::io::stdin().read_line(&mut String::new()).expect("input error...");
+
+    decrypt_file(&path, &key).expect("no oh!");
 }
